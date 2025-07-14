@@ -1,43 +1,48 @@
-# File content replacements (case-sensitive)
-REPLACE ALL: Wllama → Race
-REPLACE ALL: wllama → race
-REPLACE ALL: @wllama/wllama → @race/race
+# race - Wasm binding for llama.cpp
 
-# Rename filenames and folders
-RENAME FILE: ./src/wllama.ts → ./src/race.ts
-RENAME FILE: ./esm/wllama.js → ./esm/race.js
-RENAME FILE: ./esm/wllama.wasm → ./esm/race.wasm
-RENAME FILE: ./esm/wllama.worker.mjs → ./esm/race.worker.mjs
-RENAME FILE: ./esm/single-thread/wllama.js → ./esm/single-thread/race.js
-RENAME FILE: ./esm/single-thread/wllama.wasm → ./esm/single-thread/race.wasm
-RENAME FILE: ./esm/multi-thread/wllama.js → ./esm/multi-thread/race.js
-RENAME FILE: ./esm/multi-thread/wllama.wasm → ./esm/multi-thread/race.wasm
-RENAME FILE: ./esm/multi-thread/wllama.worker.mjs → ./esm/multi-thread/race.worker.mjs
+![](./race_banner.png)
 
-# Rename variables and instances in code
-REPLACE ALL: const wllama → const race
-REPLACE ALL: new Wllama → new Race
+Another WebAssembly binding for [llama.cpp](https://github.com/ggerganov/llama.cpp). Inspired by [tangledgroup/llama-cpp-wasm](https://github.com/tangledgroup/llama-cpp-wasm), but unlike it, **Race** aims to support **low-level API** like (de)tokenization, embeddings,...
 
-# Update import paths in all files
-REPLACE ALL: import { Wllama } from './esm/index.js'; → import { Race } from './esm/index.js';
+## Recent changes
 
-# Update package.json
-REPLACE IN package.json: "name": "@wllama/wllama" → "name": "@race/race"
+- Version 1.5.0
+  - Support split model using [gguf-split tool](https://github.com/ggerganov/llama.cpp/tree/master/examples/gguf-split)
+- Version 1.4.0
+  - Add `single-thread/race.js` and `multi-thread/race.js` to the list of `CONFIG_PATHS`
+  - `createEmbedding` is now adding BOS and EOS token by default
 
-# Update README.md
-REPLACE IN README.md: Wllama → Race
-REPLACE IN README.md: wllama → race
-REPLACE IN README.md: @wllama/wllama → @race/race
-REPLACE IN README.md: ./README_banner.png → ./race_banner.png (if you rename image)
+## Features
 
-# Update config path references
-REPLACE IN CODE:
-  'single-thread/wllama.js' → 'single-thread/race.js'
-  'single-thread/wllama.wasm' → 'single-thread/race.wasm'
-  'multi-thread/wllama.js' → 'multi-thread/race.js'
-  'multi-thread/wllama.wasm' → 'multi-thread/race.wasm'
-  'multi-thread/wllama.worker.mjs' → 'multi-thread/race.worker.mjs'
+- Typescript support
+- Can run inference directly on browser (using [WebAssembly SIMD](https://emscripten.org/docs/porting/simd.html)), no backend or GPU is needed!
+- No runtime dependency (see [package.json](./package.json))
+- High-level API: completions, embeddings
+- Low-level API: (de)tokenize, KV cache control, sampling control,...
+- Ability to split the model into smaller files and load them in parallel (same as `split` and `cat`)
+- Auto switch between single-thread and multi-thread build based on browser support
+- Inference is done inside a worker, does not block UI render
+- Pre-built npm package [@race/race](https://www.npmjs.com/package/@race/race)
 
-# Optional GitHub/NPM metadata
-RENAME: GitHub repo name → race
-RENAME: npm package name → @race/race
+Limitations:
+- To enable multi-thread, you must add `Cross-Origin-Embedder-Policy` and `Cross-Origin-Opener-Policy` headers. See [this discussion](https://github.com/ffmpegwasm/ffmpeg.wasm/issues/106#issuecomment-913450724) for more details.
+- No WebGL support, but maybe possible in the future
+- Max file size is 2GB, due to [size restriction of ArrayBuffer](https://stackoverflow.com/questions/17823225/do-arraybuffers-have-a-maximum-length). If your model is bigger than 2GB, please follow the **Split model** section below.
+
+## Demo and documentations
+
+**Documentation:** https://ngxson.github.io/race/docs/
+
+Demo:
+- Basic usages with completions and embeddings: https://ngxson.github.io/race/examples/basic/
+- Advanced example using low-level API: https://ngxson.github.io/race/examples/advanced/
+- Embedding and cosine distance: https://ngxson.github.io/race/examples/embeddings/
+
+## How to use
+
+### Use Race inside React Typescript project
+
+Install it:
+
+```bash
+npm i @race/race
